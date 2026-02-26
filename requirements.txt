@@ -1,0 +1,8 @@
+langchain
+chromadb
+ollama
+langchain-community
+pydantic
+fastapi
+langchain-text-splitters
+langchain-ollama
