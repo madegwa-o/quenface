@@ -3,8 +3,13 @@ from operator import itemgetter
 
 from langchain_ollama import OllamaLLM, OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
-from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from pathlib import Path
+from langchain_community.document_loaders import (
+    TextLoader,
+    Docx2txtLoader
+)
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
@@ -22,6 +27,25 @@ embeddings = OllamaEmbeddings(model=config.OLLAMA_EMBED)
 # -----------------------------
 # Load or Create DB
 # -----------------------------
+
+def load_documents():
+
+    docs = []
+    docs_path = Path(config.DOCS_DIR)
+
+    for file in docs_path.rglob("*"):
+
+        if file.suffix == ".txt":
+            loader = TextLoader(str(file))
+            docs.extend(loader.load())
+
+        elif file.suffix == ".docx":
+            loader = Docx2txtLoader(str(file))
+            docs.extend(loader.load())
+
+    return docs
+
+
 def load_db():
 
     if os.path.exists(config.DB_DIR):
@@ -30,8 +54,7 @@ def load_db():
             embedding_function=embeddings
         )
 
-    loader = TextLoader(config.DOC_PATH)
-    docs = loader.load()
+    docs = load_documents()
 
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=config.CHUNK_SIZE,
@@ -104,7 +127,7 @@ def format_docs_with_sources(docs):
     sources = []
 
     for i, doc in enumerate(docs):
-        source = doc.metadata.get("source", "docs.txt")
+        source = os.path.basename(doc.metadata.get("source", "unknown"))
         sources.append(source)
 
         formatted.append(

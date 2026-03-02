@@ -6,3 +6,4 @@ pydantic
 fastapi
 langchain-text-splitters
 langchain-ollama
+python-multipart
