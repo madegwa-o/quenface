@@ -36,7 +36,7 @@ def load_documents():
     for file in docs_path.rglob("*"):
 
         if file.suffix == ".txt":
-            loader = TextLoader(str(file))
+            loader = TextLoader(str(file), autodetect_encoding=True)
             docs.extend(loader.load())
 
         elif file.suffix == ".docx":
